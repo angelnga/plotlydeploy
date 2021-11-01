@@ -1,4 +1,38 @@
 function init() {
+  var selector = d3.select("#selDataset");
+
+  d3.json("samples.json").then((data) => {
+    console.log(data);
+    var sampleNames = data.names;
+    sampleNames.forEach((sample) => {
+      selector
+        .append("option")
+        .text(sample)
+        .property("value", sample);
+    });
+})}
+
+init();
+
+function optionChanged(newSample) {
+  buildMetadata(newSample);
+  buildCharts(newSample);
+}
+
+function buildMetadata(sample) {
+  d3.json("samples.json").then((data) => {
+    var metadata = data.metadata;
+    var resultArray = metadata.filter(sampleObj => sampleObj.id == sample);
+    var result = resultArray[0];
+    var PANEL = d3.select("#sample-metadata");
+
+    PANEL.html("");
+    PANEL.append("h6").text(result.location);
+  });
+}
+
+
+function init() {
   // Grab a reference to the dropdown select element
   var selector = d3.select("#selDataset");
 
@@ -55,6 +89,8 @@ function buildMetadata(sample) {
   });
 }
 
+
+// D1 - Create a Horizontal Bar Chart
 // 1. Create the buildCharts function.
 function buildCharts(sample) {
   // 2. Use d3.json to load and retrieve the samples.json file 
@@ -133,22 +169,50 @@ function buildCharts(sample) {
       x: barAvg,
       y: bar_otu_ids,
       mode: "markers",
-      marker: {color:"black",size:7}
+      marker: {color:"black",size:5}
     }
     barData = [barData,barDataAvg];
     // 9. Create the layout for the bar chart. 
     var barLayout = {
-      title: { text: "<span style='font-weight:bold;font-size:90%'>Top 10 Bacteria Cultures Found</span><br><span style='font-size:0.65em'>(Black dots represent mean sample values per OTU ID)</span>" },
+      title: "Top 10 Bacteria Cultures Found",
       yaxis: {autorange: "reversed"},
       autosize: true,
-      plot_bgcolor: '#c7c7c7',
-      hoverlabel: {font:{size:8}},
       showlegend:false,
-      hovermode: 'closest'
+      hovermode: "closest"
     };
-
+    
     // 10. Use Plotly to plot the data with the layout. 
     Plotly.newPlot("bar", barData, barLayout)
+
+
+
+
+
+
+
+
+    // D2-Create a Bubble Chart
+    // 1. Create the trace for the bubble chart.
+      var bubbleData = [{
+      x: otu_ids,
+      y: sample_values,
+      text: otu_labels,
+      mode: "markers",
+      marker: {size: sample_values.map(x=>.9*x),color: otu_ids}
+    }];
+
+    // 2. Create the layout for the bubble chart.
+    var bubbleLayout = {
+      title: "Bacteria Cultures Per Sample",
+      xaxis: {title:"OTU ID"},
+      yaxis: {title:"Sample Value"},
+      autosize: true,
+      hovermode: "closest",
+    };
+
+    // 3. Use Plotly to plot the data with the layout.
+    Plotly.newPlot("bubble", bubbleData, bubbleLayout); 
+
   });
 }
 
