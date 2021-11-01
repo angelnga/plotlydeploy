@@ -186,11 +186,6 @@ function buildCharts(sample) {
 
 
 
-
-
-
-
-
     // D2-Create a Bubble Chart
     // 1. Create the trace for the bubble chart.
       var bubbleData = [{
@@ -213,6 +208,53 @@ function buildCharts(sample) {
     // 3. Use Plotly to plot the data with the layout.
     Plotly.newPlot("bubble", bubbleData, bubbleLayout); 
 
-  });
+
+
+
+
+    // D3-Create a Gauge Chart
+    // 1. Create a variable that filters the metadata array for the object with the desired sample number.
+    var metadata = data.metadata;
+    var avg_wfreq = 0
+
+    // Compute reference value for gauge chart delta
+    for (x of metadata) {
+      avg_wfreq+=x.wfreq}
+    avg_wfreq = avg_wfreq/metadata.length
+    avg_wfreq = avg_wfreq.toFixed(2)
+
+    // Filter the data for the object with the desired sample number
+    var metadataArray = metadata.filter(sampleObj => sampleObj.id == sample);
+
+    // 2. Create a variable that holds the first sample in the metadata array.
+    var metadataPick = metadataArray[0];
+
+    // 3. Create a variable that holds the washing frequency.
+    var wfreq = metadataPick.wfreq.toFixed(2)
+
+    // 4. Create the trace for the gauge chart.
+    var gaugeData = [{
+        domain: { x: [0, 1], y: [0, 1] },
+        value: wfreq,
+        title: { text: "<span style='font-weight:bold'>Belly Button Washing Frequency</span><br><span style='font-size:0.8em'>Scrubs per Week</span>" },
+        type: "indicator",
+        mode: "gauge+number+delta",
+        delta: { reference: avg_wfreq },
+        gauge: {
+          bar: {color: "black"},
+          axis: { range: [null, 10],tickmode:'array',tickvals: [0,2,4,6,8,10] },
+          steps: [
+            { range: [0, 2], color: "red" },
+            { range: [2, 4], color: "orange" },
+            { range: [4, 6], color: "yellow" },
+            { range: [6, 8], color: "yellowgreen" },
+            { range: [8, 10], color: "green" }
+          ]
+        }
+    }];
+
+    // 6. Use Plotly to plot the gauge data and layout.
+    Plotly.newPlot("gauge",gaugeData);
+});
 }
 
